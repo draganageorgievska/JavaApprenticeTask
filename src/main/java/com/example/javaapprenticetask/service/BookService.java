@@ -14,5 +14,5 @@ public interface BookService {
     Optional<Book> getBook(Long id);
     Optional<Book> createNewBook(BookDto bookDto) throws ChangeSetPersister.NotFoundException;
     Optional<Book> updateBook(Long id,BookDto bookDto) throws ChangeSetPersister.NotFoundException;
-    void deleteBook(Long id);
+    void deleteBook(Long id) throws ChangeSetPersister.NotFoundException;
 }

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.Calendar;
 
-@Component
+//@Component
 public class DataInitializer {
     private final AuthorService authorService;
     private final BookService bookService;
@@ -20,7 +20,7 @@ public class DataInitializer {
         this.authorService = authorService;
         this.bookService = bookService;
     }
-    @PostConstruct
+  //  @PostConstruct
     public void init() throws ChangeSetPersister.NotFoundException {
         Calendar cal=Calendar.getInstance();
         this.authorService.createNewAuthor(new AuthorDto("Megan","Nolan",cal.getTime()));

@@ -34,7 +34,7 @@ public class BookController {
         return this.bookService.updateBook(id,bookDto).map(book->ResponseEntity.ok().body(book)).orElseGet(()->ResponseEntity.badRequest().build());
     }
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Book> deleteBook(@PathVariable Long id){
+    public ResponseEntity<Book> deleteBook(@PathVariable Long id) throws ChangeSetPersister.NotFoundException {
         this.bookService.deleteBook(id);
         if(this.bookService.getBook(id).isEmpty()){
             return ResponseEntity.ok().build();

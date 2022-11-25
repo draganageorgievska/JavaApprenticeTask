@@ -45,15 +45,25 @@ public class BookServiceImpl implements BookService {
     public Optional<Book> updateBook(Long bookId,BookDto bookDto) throws ChangeSetPersister.NotFoundException {
         Author author=this.authorRepository.findById(bookDto.getAuthor()).orElseThrow(ChangeSetPersister.NotFoundException::new);
         Book book=this.bookRepository.findBookById(bookId);
-        book.setTitle(bookDto.getTitle());
-        book.setAuthor(author);
-        book.setGenre(bookDto.getGenre());
-        return Optional.of(this.bookRepository.save(book));
+        if(book==null) {
+            throw new ChangeSetPersister.NotFoundException();
+        }
+        else {
+            book.setTitle(bookDto.getTitle());
+            book.setAuthor(author);
+            book.setGenre(bookDto.getGenre());
+            return Optional.of(this.bookRepository.save(book));
+        }
     }
 
     @Override
-    public void deleteBook(Long id) {
+    public void deleteBook(Long id) throws ChangeSetPersister.NotFoundException {
         Book book=this.bookRepository.findBookById(id);
-        this.bookRepository.delete(book);
+        if(book==null) {
+            throw new ChangeSetPersister.NotFoundException();
+        }
+        else{
+            this.bookRepository.delete(book);
+        }
     }
 }

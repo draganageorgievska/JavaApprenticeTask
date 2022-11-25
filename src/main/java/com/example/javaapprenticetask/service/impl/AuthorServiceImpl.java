@@ -6,7 +6,6 @@ import com.example.javaapprenticetask.repository.AuthorRepository;
 import com.example.javaapprenticetask.service.AuthorService;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.Optional;
 
 @Service
