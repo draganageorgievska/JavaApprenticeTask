@@ -3,14 +3,16 @@ package com.example.javaapprenticetask.model;
 import com.example.javaapprenticetask.model.enumerations.Genre;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class BookDto {
     private String title;
-    private Long author;
+    private List<Long> authors;
     private Genre genre;
-    public BookDto(String title, Long author,Genre genre){
+    public BookDto(String title, List<Long> authorIds,Genre genre){
         this.title=title;
-        this.author=author;
+        this.authors =authorIds;
         this.genre=genre;
     }
 }

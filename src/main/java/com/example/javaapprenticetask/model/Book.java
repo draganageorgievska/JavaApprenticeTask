@@ -4,6 +4,7 @@ import com.example.javaapprenticetask.model.enumerations.Genre;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Data
 @Entity
@@ -12,12 +13,12 @@ public class Book {
     @GeneratedValue
     private Long id;
     private String title;
-    @ManyToOne
-    private Author author;
+    @ManyToMany
+    private List<Author> authors;
     private Genre genre;
-    public Book(String title, Author author,Genre genre){
+    public Book(String title, List<Author> authors,Genre genre){
         this.title=title;
-        this.author=author;
+        this.authors=authors;
         this.genre=genre;
     }
 

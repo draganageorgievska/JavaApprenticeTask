@@ -3,7 +3,6 @@ package com.example.javaapprenticetask.service.impl;
 import com.example.javaapprenticetask.model.Author;
 import com.example.javaapprenticetask.model.Book;
 import com.example.javaapprenticetask.model.BookDto;
-import com.example.javaapprenticetask.model.enumerations.Genre;
 import com.example.javaapprenticetask.repository.AuthorRepository;
 import com.example.javaapprenticetask.repository.BookRepository;
 import com.example.javaapprenticetask.service.BookService;
@@ -36,21 +35,27 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Optional<Book> createNewBook(BookDto bookDto) throws ChangeSetPersister.NotFoundException {
-        Author author=this.authorRepository.findById(bookDto.getAuthor()).orElseThrow(ChangeSetPersister.NotFoundException::new);
-        Book book=new Book(bookDto.getTitle(),author,bookDto.getGenre());
+        List<Author> authors=this.authorRepository.findAllById(bookDto.getAuthors());
+        if(authors.isEmpty()){
+            throw new ChangeSetPersister.NotFoundException();
+        }
+        Book book=new Book(bookDto.getTitle(),authors,bookDto.getGenre());
         return Optional.of(this.bookRepository.save(book));
     }
 
     @Override
     public Optional<Book> updateBook(Long bookId,BookDto bookDto) throws ChangeSetPersister.NotFoundException {
-        Author author=this.authorRepository.findById(bookDto.getAuthor()).orElseThrow(ChangeSetPersister.NotFoundException::new);
+        List<Author> authors=this.authorRepository.findAllById(bookDto.getAuthors());
+        if(authors.isEmpty()){
+            throw new ChangeSetPersister.NotFoundException();
+        }
         Book book=this.bookRepository.findBookById(bookId);
         if(book==null) {
             throw new ChangeSetPersister.NotFoundException();
         }
         else {
             book.setTitle(bookDto.getTitle());
-            book.setAuthor(author);
+            book.setAuthors(authors);
             book.setGenre(bookDto.getGenre());
             return Optional.of(this.bookRepository.save(book));
         }
