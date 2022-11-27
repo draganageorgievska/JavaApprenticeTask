@@ -14,7 +14,9 @@ import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.text.ParseException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,19 +28,19 @@ class JavaApprenticeTaskApplicationTests {
     AuthorServiceImpl authorService;
     @Autowired
     BookServiceImpl bookService;
-    public void createAuthor(){
-        Date date=new Date(1989, Calendar.DECEMBER,11);
-        AuthorDto authorDto=new AuthorDto("Maya","Angelou",date);
+    public void createAuthor() throws ParseException {
+        AuthorDto authorDto=new AuthorDto("Maya","Angelou","1989-11-11");
         this.authorService.createNewAuthor(authorDto);
     }
     public void createBook() throws ChangeSetPersister.NotFoundException {
-        BookDto bookDto=new BookDto("I Know Why The Caged Bird Sings",1L, Genre.NONFICTION);
+        List<Long> authors=new ArrayList<>();
+        authors.add(1L);
+        BookDto bookDto=new BookDto("I Know Why The Caged Bird Sings",authors, Genre.NONFICTION);
         this.bookService.createNewBook(bookDto).get();
     }
     @Test
-    public void test_getAuthorValidId() {
-        Date date=new Date(1989, Calendar.DECEMBER,11);
-        AuthorDto authorDto=new AuthorDto("Maya","Angelou",date);
+    public void test_getAuthorValidId() throws ParseException {
+        AuthorDto authorDto=new AuthorDto("Maya","Angelou","1989-11-11");
         this.authorService.createNewAuthor(authorDto);
         Optional<Author> author=this.authorService.getAuthor(1L);
         assertEquals(author.get().getFirstName(),authorDto.getFirstName());
@@ -48,9 +50,8 @@ class JavaApprenticeTaskApplicationTests {
         assertTrue(this.authorService.getAuthor(10L).isEmpty());
     }
     @Test
-    public void test_authorCreate(){
-        Date date=new Date(1989, Calendar.DECEMBER,11);
-        AuthorDto authorDto=new AuthorDto("Maya","Angelou",date);
+    public void test_authorCreate() throws ParseException {
+        AuthorDto authorDto=new AuthorDto("Maya","Angelou","1989-11-11");
         Author author=this.authorService.createNewAuthor(authorDto).get();
         assertEquals(1L,author.getId());
         assertEquals(authorDto.getFirstName(),author.getFirstName());
@@ -59,20 +60,24 @@ class JavaApprenticeTaskApplicationTests {
     }
     @Test
     public void test_createBookUnsuccessful() {
-        BookDto bookDto1=new BookDto("I Know Why The Caged Bird Sings",23L, Genre.NONFICTION);
+        List<Long> authors=new ArrayList<>();
+        authors.add(23L);
+        BookDto bookDto1=new BookDto("I Know Why The Caged Bird Sings",authors, Genre.NONFICTION);
         assertThrows(ChangeSetPersister.NotFoundException.class,()->this.bookService.createNewBook(bookDto1));
     }
     @Test
-    public void test_createBookSuccessful() throws ChangeSetPersister.NotFoundException {
+    public void test_createBookSuccessful() throws ChangeSetPersister.NotFoundException, ParseException {
         createAuthor();
-        BookDto bookDto1=new BookDto("I Know Why The Caged Bird Sings",1L, Genre.NONFICTION);
+        List<Long> authors=new ArrayList<>();
+        authors.add(1L);
+        BookDto bookDto1=new BookDto("I Know Why The Caged Bird Sings",authors, Genre.NONFICTION);
         Book book=this.bookService.createNewBook(bookDto1).get();
-        assertEquals(bookDto1.getAuthor(),book.getAuthor().getId());
+        assertEquals(bookDto1.getAuthors(),book.getAuthors().stream().map(Author::getId).collect(Collectors.toList()));
         assertEquals(bookDto1.getTitle(),book.getTitle());
         assertEquals(bookDto1.getGenre(),book.getGenre());
     }
     @Test
-    public void test_getBooks() throws ChangeSetPersister.NotFoundException {
+    public void test_getBooks() throws ChangeSetPersister.NotFoundException, ParseException {
         createAuthor();
         createBook();
         createBook();
@@ -85,7 +90,7 @@ class JavaApprenticeTaskApplicationTests {
         assertEquals(0,books.size());
     }
     @Test
-    public void test_deleteBook() throws ChangeSetPersister.NotFoundException {
+    public void test_deleteBook() throws ChangeSetPersister.NotFoundException, ParseException {
         createAuthor();
         createBook();
         this.bookService.deleteBook(2L);
@@ -96,26 +101,33 @@ class JavaApprenticeTaskApplicationTests {
         assertThrows(ChangeSetPersister.NotFoundException.class,()->this.bookService.deleteBook(5L));
     }
     @Test
-    public void test_update() throws ChangeSetPersister.NotFoundException {
+    public void test_update() throws ChangeSetPersister.NotFoundException, ParseException {
+        createAuthor();
         createAuthor();
         createBook();
-        System.out.println(this.bookService.getAllBooks().size());
-        BookDto bookDto=new BookDto("I Know Why",1L,Genre.FICTION);
-        Optional<Book> book=this.bookService.updateBook(2L,bookDto);
+        List<Long> authors=new ArrayList<>();
+        authors.add(1L);
+        authors.add(2L);
+        BookDto bookDto=new BookDto("I Know Why",authors,Genre.FICTION);
+        Optional<Book> book=this.bookService.updateBook(3L,bookDto);
         assertEquals(bookDto.getTitle(),book.get().getTitle());
-        assertEquals(bookDto.getAuthor(),book.get().getAuthor().getId());
+        assertEquals(bookDto.getAuthors(),book.get().getAuthors().stream().map(Author::getId).collect(Collectors.toList()));
         assertEquals(bookDto.getGenre(),book.get().getGenre());
     }
     @Test
-    public void test_UpdateBookDoesNotExist(){
+    public void test_UpdateBookDoesNotExist() throws ParseException {
         createAuthor();
-        BookDto bookDto=new BookDto("I Know Why",1L,Genre.FICTION);
+        List<Long> authors=new ArrayList<>();
+        authors.add(1L);
+        BookDto bookDto=new BookDto("I Know Why",authors,Genre.FICTION);
         assertThrows(ChangeSetPersister.NotFoundException.class,()->this.bookService.updateBook(1L,bookDto));
     }
     @Test
-    public void test_UpdateAuthorDoesNotExist(){
+    public void test_UpdateAuthorDoesNotExist() throws ParseException {
         createAuthor();
-        BookDto bookDto=new BookDto("I Know Why",10L,Genre.FICTION);
+        List<Long> authors=new ArrayList<>();
+        authors.add(10L);
+        BookDto bookDto=new BookDto("I Know Why",authors,Genre.FICTION);
         assertThrows(ChangeSetPersister.NotFoundException.class,()->this.bookService.updateBook(2L,bookDto));
     }
 }
